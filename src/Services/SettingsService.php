@@ -95,16 +95,23 @@ class SettingsService
      *
      * @param string $settingsKey
      * @param string $paymentKey
+     * @param int $clientId
+     * @param int $pluginSetId
      *
      * @return mixed
      */
-    public function getPaymentSettingsValue($settingsKey, $paymentKey = null)
+    public function getNnPaymentSettingsValue($settingsKey, $paymentKey = null, $clientId = null, $pluginSetId = null)
     {
-		if(!empty($paymentKey) && isset($settings->value[$paymentKey])) {
-			return $settings->value[$paymentKey][$settingsKey];
-		} else {
-			return $settings->value[$settingsKey];
-		}
-        return null;
+        
+        $settings = $this->getNnSettings($clientId, $pluginSetId);
+        
+        if(!is_null($settings)) {
+            if(!empty($paymentKey) && isset($settings->value[$paymentKey])) {
+                return $settings->value[$paymentKey][$settingsKey];
+            } else {
+                return $settings->value[$settingsKey];
+            }
+        }
+            return null;
     }
 }
