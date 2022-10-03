@@ -82,8 +82,8 @@ function loadCardForm() {
                 country_code: (transactionData.country_code !== undefined) ? transactionData.country_code : ''
             },
             shipping: {
-                if(transactionData.shipping.same_as_billing !== undefined) {
-                    same_as_billing: transactionData.shipping.same_as_billing,
+                if(transactionData.same_as_billing !== undefined) {
+                    same_as_billing: transactionData.same_as_billing,
                 } else {
                     street: (transactionData.shipping.street !== undefined) ? transactionData.shipping.street : '',
                     city: (transactionData.shipping.city !== undefined) ? transactionData.shipping.city : '',
@@ -104,6 +104,7 @@ function loadCardForm() {
             lang: (transactionData.lang !== undefined) ? transactionData.lang : 'de'
         }
     };
+    console.log(requestData);
     NovalnetUtility.createCreditCardForm(requestData);
     jQuery('.loader').hide(700);
 }
