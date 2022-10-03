@@ -50,7 +50,7 @@ class CreateNovalnetPaymentMethods1200
     {
         $paymentMethods = [
 			'NOVALNET_SEPA' => 'Novalnet Direct Debit SEPA',
-			'NOVALNET_CC', 'Novalnet Credit/Debit Cards',
+			'NOVALNET_CC' => 'Novalnet Credit/Debit Cards',
 			'NOVALNET_APPLEPAY' => 'Novalnet ApplePay',
 			'NOVALNET_INVOICE' => 'Novalnet Invoice',
 			'NOVALNET_PREPAYMENT' => 'Novalnet Prepayment',
