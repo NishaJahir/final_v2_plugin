@@ -82,14 +82,11 @@ function loadCardForm() {
                 country_code: (transactionData.country_code !== undefined) ? transactionData.country_code : ''
             },
             shipping: {
-                if(transactionData.same_as_billing !== undefined) {
-                    same_as_billing: transactionData.same_as_billing,
-                } else {
+                    same_as_billing: (transactionData.same_as_billing !== undefined) ? transactionData.same_as_billing : 0,
                     street: (transactionData.shipping.street !== undefined) ? transactionData.shipping.street : '',
                     city: (transactionData.shipping.city !== undefined) ? transactionData.shipping.city : '',
                     zip: (transactionData.shipping.zip !== undefined) ? transactionData.shipping.zip : '',
                     country_code: (transactionData.shipping.country_code !== undefined) ? transactionData.shipping.country_code : ''
-                }
             }
         },
         // Transaction data
