@@ -175,8 +175,8 @@ class NovalnetServiceProvider extends ServiceProvider
 							'nnPaymentProcessUrl' 	=> $paymentService->getProcessPaymentUrl(),
 							'paymentMopKey' 		=>  $paymentKey,
 							'paymentName' 			=> $paymentHelper->getCustomizedTranslatedText('template_' . strtolower($paymentKey)),
-							'ccFormDetails' 		=> $paymentService->getCreditCardAuthenticationCallData($basketRepository->load(), strtolower($paymentKey)),
-							'ccCustomFields' 		=> $paymentService->getCcFormFields() ?? ''
+							'transactionData' 		=> $paymentService->getCreditCardAuthenticationCallData($basketRepository->load(), strtolower($paymentKey)),
+							'customData' 		=> $paymentService->getCcFormFields() ?? ''
 						]);
                         $contentType = 'htmlContent';
                     }
