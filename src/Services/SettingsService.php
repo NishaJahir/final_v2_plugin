@@ -100,10 +100,10 @@ class SettingsService
      *
      * @return mixed
      */
-    public function getNnPaymentSettingsValue($settingsKey, $paymentKey = null, $clientId = null, $pluginSetId = null)
+    public function getPaymentSettingsValue($settingsKey, $paymentKey = null, $clientId = null, $pluginSetId = null)
     {
         
-        $settings = $this->getNnSettings($clientId, $pluginSetId);
+        $settings = $this->getSettings($clientId, $pluginSetId);
         
         if(!is_null($settings)) {
             if(!empty($paymentKey) && isset($settings->value[$paymentKey])) {
