@@ -54,7 +54,7 @@ class NovalnetGooglePayButtonDataProvider
         // Required details for the Google Pay button
         $googlePayData = [
                             'clientKey'     => trim($settingsService->getPaymentSettingsValue('novalnet_client_key')),
-                            'MerchantId'    => $settingsService->getPaymentSettingsValue('payment_active', 'novalnet_google_pay'),
+                            'merchantId'    => $settingsService->getPaymentSettingsValue('payment_active', 'novalnet_google_pay'),
                             'sellerName'    => $settingsService->getPaymentSettingsValue('business_name', 'novalnet_google_pay'),
                             'enforce'       => $settingsService->getPaymentSettingsValue('enforce', 'novalnet_google_pay'),
                             'buttonType'    => $settingsService->getPaymentSettingsValue('button_type', 'novalnet_google_pay'),
@@ -65,7 +65,7 @@ class NovalnetGooglePayButtonDataProvider
         // Render the Google Pay button
        return $twig->render('Novalnet::PaymentForm.NovalnetGooglePayButton',
                                     [
-                                        'mopId'                 => $paymentMethodDetails->id,
+                                        'mopId'                 => $paymentMethodDetails[0],
                                         'googlePayData'         => $googlePayData,
                                         'countryCode'           => 'DE',
                                         'orderTotalAmount'      => $orderAmount,
