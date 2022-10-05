@@ -64,12 +64,10 @@ jQuery(document).ready(function() {
                 jQuery('li[data-id="'+mopId+'"]').click(function() {
                     // Initiating the payment request for the wallet payment
                     NovalnetWalletPaymentObj.addPaymentButton("#nn_google_pay");
-                    // Hide the shop place-order button
-                    jQuery('.widget-place-order').hide();
                 });
             } else {
                 // Hide the Google Pay payment if it is not possible
-                jQuery('li[data-id="'+mopId+'"]').show();
+                jQuery('li[data-id="'+mopId+'"]').hide();
             }
         });
     } catch (e) {
