@@ -196,6 +196,7 @@ class WebhookController extends Controller
      */
     public function renderTemplate($webhookMsg)
     {
+	$this->getLogger(__METHOD__)->error('webhook msg', $webhookMsg);
         return $this->twig->render('Novalnet::webhook.NovalnetWebhook', ['webhookMsg' => $webhookMsg]);
     }
 
