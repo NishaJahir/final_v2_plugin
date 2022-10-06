@@ -62,8 +62,10 @@ jQuery(document).ready(function() {
                 // Display the Google Pay payment
                 jQuery('li[data-id="'+mopId+'"]').show();
                 jQuery('li[data-id="'+mopId+'"]').click(function() {
-                    // Initiating the payment request for the wallet payment
-                    NovalnetWalletPaymentObj.addPaymentButton("#nn_google_pay");
+                    if( jQuery('.gpay-card-info-container-fill').length == 0 ) {
+                        // Initiating the payment request for the wallet payment
+                        NovalnetWalletPaymentObj.addPaymentButton("#nn_google_pay");
+                    }
                 });
             } else {
                 // Hide the Google Pay payment if it is not possible
