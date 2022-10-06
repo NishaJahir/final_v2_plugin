@@ -340,7 +340,8 @@ class NovalnetAssistant extends WizardProvider
                     'type' => 'text',
                     'options' => [
                                   'name'    => 'NovalnetAssistant.novalnetSepaDueDateLabel',
-                                  'tooltip' => 'NovalnetAssistant.novalnetSepaDueDateTooltip'
+                                  'tooltip' => 'NovalnetAssistant.novalnetSepaDueDateTooltip',
+			          'pattern' => '^[1-9]\d*$'
                                  ]
                 ]
             ];
@@ -423,7 +424,8 @@ class NovalnetAssistant extends WizardProvider
                 'type'      => 'text',
                 'options'   => [
                                 'name'      => 'NovalnetAssistant.novalnetInvoiceDuedateLabel',
-                                'tooltip'   => 'NovalnetAssistant.novalnetInvoiceDuedateTooltip'
+                                'tooltip'   => 'NovalnetAssistant.novalnetInvoiceDuedateTooltip',
+			        'pattern'   => '^[1-9]\d*$'
                                ]
             ]
         ];
@@ -446,7 +448,8 @@ class NovalnetAssistant extends WizardProvider
                 'type'      => 'text',
                 'options'   => [
                                 'name'      => 'NovalnetAssistant.novalnetPrepaymentDuedateLabel',
-                                'tooltip'   => 'NovalnetAssistant.novalnetPrepaymentDuedateTooltip'
+                                'tooltip'   => 'NovalnetAssistant.novalnetPrepaymentDuedateTooltip',
+			        'pattern'   => '^[1-9]\d*$'
                                ]
             ]
         ];
@@ -469,7 +472,8 @@ class NovalnetAssistant extends WizardProvider
                 'type' => 'text',
                 'options' => [
                               'name'    => 'NovalnetAssistant.novalnetCashpaymentDueDateLabel',
-                              'tooltip' => 'NovalnetAssistant.novalnetCashpaymentDueDateTooltip'
+                              'tooltip' => 'NovalnetAssistant.novalnetCashpaymentDueDateTooltip',
+			      'pattern' => '^[1-9]\d*$'
                              ]
             ]
         ];
