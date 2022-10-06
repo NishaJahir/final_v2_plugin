@@ -116,6 +116,7 @@ class WebhookController extends Controller
      * @param TransactionService $transactionService
      */
     public function __construct(Request $request,
+				Twig $twig,
                                 PaymentHelper $paymentHelper,
                                 PaymentService $paymentService,
                                 SettingsService $settingsService,
@@ -125,6 +126,7 @@ class WebhookController extends Controller
                                 )
     {
         $this->eventData            = $request->all();
+	$this->twig		    = $twig;
         $this->paymentHelper        = $paymentHelper;
         $this->paymentService       = $paymentService;
         $this->settingsService      = $settingsService;
