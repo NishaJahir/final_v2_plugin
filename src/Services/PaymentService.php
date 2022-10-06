@@ -991,20 +991,19 @@ class PaymentService
     /**
      * Process the transaction capture/void
      *
-     * @param array $paymentRequestData
+     * @param array $transactionData
      * @param string $paymentUrl
      *
      * @return none
      */
-    public function doCaptureVoid($paymentRequestData, $paymentUrl)
+    public function doCaptureVoid($transactionData, $paymentUrl)
     {
         try {
             // Novalnet access key
             $privateKey = $this->settingsService->getPaymentSettingsValue('novalnet_private_key');
-            $paymentRequestData = [
-				'tid'   => $paymentRequestData['tid'],
-				'lang'  => 'DE'
-			];
+            $paymentRequestData = [];
+	    $paymentRequestData['transaction']['tid'] = $transactionData['tid'];
+            $paymentRequestData['custom']['lang'] = 'DE';
             // Send the payment capture/void call to Novalnet server
             $paymentResponseData = $this->paymentHelper->executeCurl($paymentRequestData, $paymentUrl, $privateKey);
             $paymentResponseData = array_merge($paymentRequestData, $paymentResponseData);
