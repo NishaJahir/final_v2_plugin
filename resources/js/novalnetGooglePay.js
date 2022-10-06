@@ -31,7 +31,7 @@ jQuery(document).ready(function() {
                     type: jQuery('#nn_button_type').val(),
                     style: jQuery('#nn_button_theme').val(),
                     locale: "en-US", // Needs to update based on forum reply
-                    boxSizing: "border-box",
+                    boxSizing: "fill",
                     dimensions: {
                         height: jQuery('#nn_button_height').val(),
                         width: 200
