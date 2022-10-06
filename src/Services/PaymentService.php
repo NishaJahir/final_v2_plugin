@@ -1011,6 +1011,8 @@ class PaymentService
             if(in_array($paymentResponseData['transaction']['status'], ['PENDING', 'CONFIRMED'])) {
                 $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('webhook_order_confirmation_text', $paymentRequestData['lang']), date('d.m.Y'), date('H:i:s'));
             } else {
+		$paymentResponseData['transaction']['amount'] = 0;
+		$paymentResponseData['transaction']['currency'] = $transactionData['currency'];
                 $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('webhook_transaction_cancellation', $paymentRequestData['lang']), date('d.m.Y'), date('H:i:s'));
             }
             // Get the Novalnet payment methods Id
