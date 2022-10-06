@@ -185,15 +185,12 @@ class NovalnetServiceProvider extends ServiceProvider
 
                 // If payment before order creation option was set as 'No' the payment will be created initially
                 if($settingsService->getPaymentSettingsValue('novalnet_order_creation') != true
-                && (in_array($paymentKey, ['NOVALNET_INVOICE', 'NOVALNET_PREPAYMENT', 'NOVALNET_CASHPAYMENT', 'NOVALNET_MULTIBANCO']) || $paymentService->isRedirectPayment($paymentKey)  || ($paymentKey == 'NOVALNET_GUARANTEED_INVOICE' && $showBirthday == false))) {
+                && (in_array($paymentKey, ['NOVALNET_INVOICE', 'NOVALNET_PREPAYMENT', 'NOVALNET_CASHPAYMENT', 'NOVALNET_MULTIBANCO']) || ($paymentKey == 'NOVALNET_GUARANTEED_INVOICE' && $showBirthday == false))) {
                     $privateKey = $settingsService->getPaymentSettingsValue('novalnet_private_key');
                     $paymentResponseData = $paymentService->performServerCall();
                     if(!empty($paymentResponseData) && ($paymentResponseData['result']['status'] == 'FAILURE' || $paymentResponseData['status'] == 'FAILURE')) {
                         $content = $paymentResponseData['result']['status_text'];
                         $contentType = 'errorCode';
-                    }
-                    if($paymentService->isRedirectPayment($paymentKey)) {
-                        $sessionStorage->getPlugin()->setValue('nnPaymentResponseData', $paymentResponseData);
                     }
                 }
                 $event->setValue($content);
@@ -230,9 +227,10 @@ class NovalnetServiceProvider extends ServiceProvider
                     $sessionStorage->getPlugin()->setValue('nnOrderNo',$event->getOrderId());
                     $sessionStorage->getPlugin()->setValue('mop',$event->getMop());
                     $sessionStorage->getPlugin()->setValue('paymentkey', $paymentKey);
-                    if($settingsService->getPaymentSettingsValue('novalnet_order_creation') == true) {
+                    $nnDoRedirect = $sessionStorage->getPlugin()->getValue('nnDoRedirect');
+                    if($settingsService->getPaymentSettingsValue('novalnet_order_creation') == true || $paymentService->isRedirectPayment($paymentKey) || !empty($nnDoRedirect)) {
                         $paymentResponseData = $paymentService->performServerCall();
-                        $nnDoRedirect = $sessionStorage->getPlugin()->getValue('nnDoRedirect');
+                       
                         if($paymentService->isRedirectPayment($paymentKey) || !empty($nnDoRedirect)) {
                             if(!empty($paymentResponseData) && !empty($paymentResponseData['result']['redirect_url']) && !empty($paymentResponseData['transaction']['txn_secret'])) {
                                 // Transaction secret used for the later checksum verification
@@ -247,16 +245,8 @@ class NovalnetServiceProvider extends ServiceProvider
                             }
                         }
                     } else {
-                      if(!$paymentService->isRedirectPayment($paymentKey)) {
-                            // Handle the further process to the order based on the payment response
+                            // Handle the further process to the order based on the payment response for direct payment payments
                              $paymentService->HandlePaymentResponse();
-                        } else {
-                            $paymentResponseData = $sessionStorage->getPlugin()->getValue('nnPaymentResponseData');
-                            // Transaction secret used for the later checksum verification
-                            $sessionStorage->getPlugin()->setValue('nnTxnSecret', $paymentResponseData['transaction']['txn_secret']);
-                            $event->setType('redirectUrl');
-                            $event->setValue($paymentResponseData['result']['redirect_url']);
-                        }
                    }
                 }
             });
