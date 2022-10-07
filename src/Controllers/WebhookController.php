@@ -355,7 +355,7 @@ class WebhookController extends Controller
     public function handleCommunicationBreak($orderObj)
     {
         //  Get order language from the order object
-        $orderlanguage = $this->orderLanguage($orderObj);
+        $orderlanguage = $this->getOrderLanguage($orderObj);
         foreach($orderObj->properties as $orderProperty) {
             if($orderProperty->typeId == '3' && $this->paymentHelper->getPaymentKeyByMop($orderProperty->value)) {  // Is the Novalnet payment methods
                 $this->eventData['custom']['lang'] = $orderlanguage;
