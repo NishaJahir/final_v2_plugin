@@ -275,7 +275,7 @@ class WebhookController extends Controller
             return $this->renderTemplate('Order reference not found for the TID ' . $this->parentTid);
         }
         // Get the Order No and proceed further
-        $orderNo = !empty($novalnetOrderDetail->orderNo) ?? $this->eventData['transaction']['order_no'];
+         $orderNo = !empty($novalnetOrderDetail->orderNo) ? $novalnetOrderDetail->orderNo : $this->eventData['transaction']['order_no'];
         // If the order in the Novalnet server to the order number in Novalnet database doesn't match, then there is an issue
         if(!empty($this->eventData['transaction']['order_no']) && !empty($novalnetOrderDetail->orderNo) && (($this->eventData['transaction']['order_no']) != $novalnetOrderDetail->orderNo)) {
             return $this->renderTemplate('Order reference not matching for the order number ' . $orderNo);
@@ -361,7 +361,7 @@ class WebhookController extends Controller
                 // Create the payment to the plenty order
                 $this->paymentHelper->createPlentyPayment($this->eventData);
                 // Webhook executed message
-                $webhookComments = $this->paymentHelper->getTranslatedText('nn_tid_label') . $this->eventData['transaction']['tid'];
+                $webhookComments = $this->paymentHelper->getTranslatedText('nn_tid') . $this->eventData['transaction']['tid'];
                 if(!empty($this->eventData['transaction']['test_mode'])) {
                     $webhookComments .= '<br>' . $this->paymentHelper->getTranslatedText('test_order') . $this->eventData['transaction']['test_mode'];
                 }
