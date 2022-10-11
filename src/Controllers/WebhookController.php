@@ -157,28 +157,21 @@ class WebhookController extends Controller
         if($this->eventData['result']['status'] == 'SUCCESS') {
             switch($this->eventType) {
                 case 'PAYMENT':
-                    $this->renderTemplate('The Payment has been received');
-                    break;
+                    return $this->renderTemplate('The Payment has been received');
                 case 'TRANSACTION_CAPTURE':
                 case 'TRANSACTION_CANCEL':
-                    $this->handleTransactionCaptureCancel();
-                    break;
+                    return $this->handleTransactionCaptureCancel();
                 case 'TRANSACTION_UPDATE':
-                    $this->handleTransactionUpdate();
-                    break;
+                    return $this->handleTransactionUpdate();
                 case 'TRANSACTION_REFUND':
-                    $this->handleTransactionRefund();
-                    break;
+                    return $this->handleTransactionRefund();
                 case 'CREDIT':
-                    $this->handleTransactionCredit();
-                    break;
+                    return $this->handleTransactionCredit();
                 case 'CHARGEBACK':
-                    $this->handleChargeback();
-                    break;
+                    return $this->handleChargeback();
                 case 'PAYMENT_REMINDER':
                 case 'COLLECTION':
-                    $this->handlePaymentNotifications();
-                    break;
+                    return $this->handlePaymentNotifications();
                 default:
                     return $this->renderTemplate('The webhook notification has been received for the unhandled EVENT type ( ' . $this->eventType . ')' );
             }
@@ -196,7 +189,6 @@ class WebhookController extends Controller
      */
     public function renderTemplate($webhookMsg)
     {
-	$this->getLogger(__METHOD__)->error('webhook msg', $webhookMsg);
         return $this->twig->render('Novalnet::webhook.NovalnetWebhook', ['webhookMsg' => $webhookMsg]);
     }
 
@@ -277,6 +269,7 @@ class WebhookController extends Controller
         $novalnetOrderDetails = $this->transactionService->getTransactionData('tid', $this->parentTid);
         // Use the initial transaction details
         $novalnetOrderDetail = $novalnetOrderDetails[0];
+	$additionalInfo = json_decode($novalnetOrderDetail->additionalInfo, true);
         // If both the order number from Novalnet and in shop is missing, then something is wrong
         if(empty($novalnetOrderDetail->orderNo) && empty($this->eventData['transaction']['order_no'])) {
             return $this->renderTemplate('Order reference not found for the TID ' . $this->parentTid);
@@ -294,6 +287,7 @@ class WebhookController extends Controller
             $orderObj->orderPaidAmount    = 0; // Collect paid amount information from the novalnet DB
             $orderObj->orderNo            = $novalnetOrderDetail->orderNo;
             $orderObj->paymentName        = $novalnetOrderDetail->paymentName;
+	    $orderObj->currency	          = $additionalInfo['currency'];
             // Get the Novalnet payment methods Id
             $mop = $this->paymentHelper->getPaymentMethodByKey(strtoupper($novalnetOrderDetail->paymentName));
             $orderObj->mopId = $mop[0];
@@ -407,6 +401,8 @@ class WebhookController extends Controller
         if($this->eventType == 'TRANSACTION_CAPTURE') {
             $webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_order_confirmation_text', $this->orderLanguage), date('d.m.Y'), date('H:i:s'));
         } else {
+ 	    $this->eventData['transaction']['amount'] = 0;
+	    $this->eventData['transaction']['currency'] = $this->orderDetails->currency;
             $webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_transaction_cancellation', $this->orderLanguage), date('d.m.Y'), date('H:i:s'));
         }
         // Insert the updated transaction details into Novalnet DB
@@ -479,12 +475,12 @@ class WebhookController extends Controller
     {
         // If refund is executing
         if(!empty($this->eventData['transaction']['refund']['amount'])) {
-			$webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_refund_execution', $this->orderLanguage), $this->parentTid, sprintf('%0.2f', ($this->eventData['transaction']['amount']/100)) , $this->eventData['transaction']['currency']);
+			$webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_refund_execution', $this->orderLanguage), $this->parentTid, sprintf('%0.2f', ($this->eventData['transaction']['refund']['amount']/100)) , $this->eventData['transaction']['currency']);
             if(!empty($this->eventData['transaction']['refund']['tid'])) {
-                $webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_new_tid_refund_execution', $this->orderLanguage), $this->parentTid, sprintf('%0.2f', ($this->eventData['transaction']['amount']/100)) , $this->eventData['transaction']['currency'], $this->eventTid);
+                $webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_new_tid_refund_execution', $this->orderLanguage), $this->parentTid, sprintf('%0.2f', ($this->eventData['transaction']['refund']['amount']/100)) , $this->eventData['transaction']['currency'], $this->eventTid);
             }
             // Get chargeback status it is happened for Full amount or Partially
-            $refundStatus = $this->paymentService->getRefundStatus($this->eventData['transaction']['order_no'], $this->orderDetails->orderTotalAmount);
+            $refundStatus = $this->paymentService->getRefundStatus($this->eventData['transaction']['order_no'], $this->orderDetails->orderTotalAmount, $this->eventData['transaction']['refund']['amount']);
             // Set the refund status it Partial or Full refund
             $this->eventData['refund'] = $refundStatus;
             // Insert the refund transaction details into Novalnet DB
@@ -543,7 +539,7 @@ class WebhookController extends Controller
         // Insert the refund details into Novalnet DB
         $this->paymentService->insertPaymentResponse($this->eventData, $this->parentTid, $RefundOrderTotalAmount, 0);
         // Get chargeback status it is happened for Full amount or Partially
-        $refundStatus = $this->paymentService->getRefundStatus($this->eventData['transaction']['order_no'], $this->orderDetails->orderTotalAmount);
+        $refundStatus = $this->paymentService->getRefundStatus($this->eventData['transaction']['order_no'], $this->orderDetails->orderTotalAmount, $this->eventData['transaction']['amount']);
         // Set the refund status it Partial or Full refund
         $this->eventData['refund'] = $refundStatus;
         // Booking Message
