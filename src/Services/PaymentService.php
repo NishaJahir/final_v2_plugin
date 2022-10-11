@@ -1070,10 +1070,11 @@ class PaymentService
      *
      * @param int $orderId
      * @param int $orderAmount
+     * @param int $refundAmount
      *
      * @return string
      */
-    public function getRefundStatus($orderId, $orderAmount)
+    public function getRefundStatus($orderId, $orderAmount, $refundAmount)
     {
         // Get the transaction details for an order
         $transactionDetails = $this->transactionService->getTransactionData('orderNo', $orderId);
@@ -1083,12 +1084,14 @@ class PaymentService
                 if(!empty($transactionDetail->additionalInfo)) {
                     $additionalInfo = json_decode($transactionDetail->additionalInfo, true);
                     if($additionalInfo['type'] == 'debit') {
-                        $totalCallbackDebitAmount += $transactionDetail->callbackAmount;
+                        $totalCallbackDebitAmount += $transactionDetail->callbackAmount + $refundAmount;
                     }
                 } else {
-                    $totalCallbackDebitAmount += $transactionDetail->callbackAmount;
+                    $totalCallbackDebitAmount += $refundAmount;
                 }
-            }
+            } else {
+		   $totalCallbackDebitAmount += $refundAmount;
+	   }
         }
         $refundStatus = ($orderAmount > $totalCallbackDebitAmount) ? 'Partial' : 'Full';
         return $refundStatus;
