@@ -428,8 +428,9 @@ class PaymentService
         $paymentRequestData = $this->sessionStorage->getPlugin()->getValue('nnPaymentData');
 	$paymentKey = $this->paymentHelper->getPaymentKey($paymentRequestData['paymentRequestData']['transaction']['payment_type']);
 	$nnDoRedirect = $this->sessionStorage->getPlugin()->getValue('nnDoRedirect');
+	$nnOrderCreator = $this->sessionStorage->getPlugin()->getValue('nnOrderCreator');
         // Send the order no to Novalnet server if order is created initially
-        if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') == true || $this->isRedirectPayment($paymentKey) || !empty($nnDoRedirect)) {
+        if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') == true || $this->isRedirectPayment($paymentKey) || !empty($nnDoRedirect) || !empty($nnOrderCreator)) {
             $paymentRequestData['paymentRequestData']['transaction']['order_no'] = $this->sessionStorage->getPlugin()->getValue('nnOrderNo');
         }
         $privateKey = $this->settingsService->getPaymentSettingsValue('novalnet_private_key');
@@ -454,7 +455,7 @@ class PaymentService
             // Set the payment response in the session for the further processings
             $this->sessionStorage->getPlugin()->setValue('nnPaymentData', array_merge($paymentRequestData['paymentRequestData'], $paymentResponseData));
            // If payment before order creation option was set as 'Yes' handle the further process to the order based on the payment response
-           if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') == true) {
+           if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') == true || !empty($nnOrderCreator)) {
                 $this->HandlePaymentResponse();
            }
         }
@@ -551,13 +552,13 @@ class PaymentService
             $this->sessionStorage->getPlugin()->setValue('novalnetCheckoutToken', $nnPaymentData['transaction']['checkout_token']);
             $this->sessionStorage->getPlugin()->setValue('novalnetCheckoutUrl', $nnPaymentData['transaction']['checkout_js']);
         }
+	// Insert payment response into Novalnet table
+        $this->insertPaymentResponse($nnPaymentData);
         // Update the Order No to the order if the payment before order completion set as 'No' for direct payments
-        if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true && !$this->isRedirectPayment(strtoupper($nnPaymentData['payment_method']))) {
+        if(empty($nnOrderCreator) && $this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true && !$this->isRedirectPayment(strtoupper($nnPaymentData['payment_method']))) {
             $paymentResponseData = $this->sendPostbackCall($nnPaymentData);
             $nnPaymentData = array_merge($nnPaymentData, $paymentResponseData);
         }
-        // Insert payment response into Novalnet table
-        $this->insertPaymentResponse($nnPaymentData);
         // Create a plenty payment to the order
         $this->paymentHelper->createPlentyPayment($nnPaymentData);
     }
