@@ -403,6 +403,7 @@ class PaymentHelper
 	    // Get the Novalnet payment method Id if it is missing in the response
             if(empty($paymentResponseData['mop'])) {
                 $paymentMethodDetail = $this->getPaymentMethodByKey($this->getPaymentKey($paymentResponseData['transaction']['payment_type']));
+		    $this->getLogger(__METHOD__)->error('res22', $paymentMethodDetail);
                 $paymentResponseData['mop'] = $paymentMethodDetail[0];
             }
 	$this->getLogger(__METHOD__)->error('res1', $paymentResponseData);
