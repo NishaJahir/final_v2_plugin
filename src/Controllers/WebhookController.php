@@ -513,6 +513,7 @@ class WebhookController extends Controller
         $this->eventData['credit'] = 1;
         // Booking Message
         $this->eventData['bookingText'] = $webhookComments;
+	$this->eventData['mop'] = $this->orderDetails->mopId;
         $orderTotalAmount = $this->orderDetails->orderTotalAmount;
         // Insert the refund details into Novalnet DB
         $this->paymentService->insertPaymentResponse($this->eventData, $this->parentTid, 0, $orderTotalAmount);
@@ -544,6 +545,7 @@ class WebhookController extends Controller
         $this->eventData['refund'] = $refundStatus;
         // Booking Message
         $this->eventData['bookingText'] = $webhookComments;
+	$this->eventData['mop'] = $this->orderDetails->mopId;
         // Create the payment to the plenty order
         $this->paymentHelper->createPlentyPayment($this->eventData);
         return $this->renderTemplate($webhookComments);
