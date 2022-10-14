@@ -1018,9 +1018,6 @@ class PaymentService
 		$paymentResponseData['transaction']['currency'] = $transactionData['currency'];
                 $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('webhook_transaction_cancellation', $paymentRequestData['lang']), date('d.m.Y'), date('H:i:s'));
             }
-            // Get the Novalnet payment methods Id
-            $mop = $this->paymentHelper->getPaymentMethodByKey(strtoupper($paymentRequestData['paymentName']));
-            $paymentResponseData['mop'] = $mop[0];
             // Insert the updated transaction details into Novalnet DB
             $this->insertPaymentResponse($paymentResponseData);
             // Create the payment to the plenty order
