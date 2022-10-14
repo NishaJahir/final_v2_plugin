@@ -880,11 +880,11 @@ class PaymentService
             }
         }
         // Form the bank details for invoice payments
-        if(in_array($transactionData['paymentName'], ['novalnet_invoice', 'novalnet_prepayment', 'novalnet_guaranteed_invoice']) && in_array($transactionData['tx_status'], ['PENDING', 'CONFIRMED'])) {
+        if(in_array($transactionData['paymentName'], ['novalnet_invoice', 'novalnet_prepayment', 'novalnet_guaranteed_invoice']) && in_array($transactionData['tx_status'], ['PENDING', 'ON_HOLD', 'CONFIRMED'])) {
             $transactionComments .= PHP_EOL . $this->getBankDetailsInformation($transactionData);
         }
         // Form the cashpayment comments
-        if($transactionData['paymentName'] == 'novalnet_cashpayment') {
+        if($transactionData['paymentName'] == 'novalnet_cashpayment' && $transactionData['tx_status'] == 'PENDING') {
             if(!empty($transactionData['cashpayment_comments'])) {
                 $transactionComments .= PHP_EOL . $transactionData['cashpayment_comments'];
             } else {
@@ -892,7 +892,7 @@ class PaymentService
             }
         }
         // Form the Multibanco payment reference
-        if($transactionData['paymentName'] == 'novalnet_multibanco') {
+        if($transactionData['paymentName'] == 'novalnet_multibanco' && $transactionData['tx_status'] == 'PENDING') {
             $transactionComments .= PHP_EOL . $this->getMultibancoReferenceInformation($transactionData);
         }
         return $transactionComments;
@@ -939,7 +939,7 @@ class PaymentService
     {
         $invoiceComments = PHP_EOL . sprintf($this->paymentHelper->getTranslatedText('transfer_amount_duedate_text'), $transactionData['amount'], $transactionData['currency'], date('Y/m/d', (int)strtotime($transactionData['due_date'])));
         // If the transaction is in On-Hold not displaying the due date
-        if($transactionData['tx_status'] != 'ON_HOLD') {
+        if($transactionData['tx_status'] == 'ON_HOLD') {
             $invoiceComments = PHP_EOL . PHP_EOL . sprintf($this->paymentHelper->getTranslatedText('transfer_amount_text'), $transactionData['amount'], $transactionData['currency']);
         }
         $invoiceComments .= PHP_EOL . $this->paymentHelper->getTranslatedText('account_holder_novalnet') . $transactionData['invoice_account_holder'];
