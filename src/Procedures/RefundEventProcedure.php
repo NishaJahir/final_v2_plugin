@@ -113,8 +113,9 @@ class RefundEventProcedure
                 // Send the payment capture/void call to Novalnet server
                 $paymentResponseData = $this->paymentHelper->executeCurl($paymentRequestData, NovalnetConstants::PAYMENT_REFUND_URL, $privateKey);
                 $paymentResponseData = array_merge($paymentRequestData, $paymentResponseData);
+		$this->getLogger(__METHOD__)->error('res refund', $paymentResponseData);
                 // If refund is successful
-                if(in_array($paymentResponseData['transaction']['status'], ['PENDING', 'CONFIRMED'])) {
+                if(in_array($paymentResponseData['transaction']['status'], ['PENDING', 'CONFIRMED', 'DEACTIVATED'])) {
                     // Booking text
                     if(!empty($paymentResponseData['transaction']['refund']['tid'])) {
                         $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message_new_tid', $paymentResponseData['custom']['lang']), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)) , $paymentCurrency, $paymentResponseData['transaction']['refund']['tid']);
