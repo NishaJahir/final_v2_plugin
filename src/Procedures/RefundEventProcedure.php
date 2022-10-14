@@ -119,7 +119,7 @@ class RefundEventProcedure
                     if(!empty($paymentResponseData['transaction']['refund']['tid'])) {
                         $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message_new_tid', $paymentResponseData['custom']['lang']), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)) , $paymentCurrency, $paymentResponseData['transaction']['refund']['tid']);
                     } else {
-                        $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message', $paymentResponseData['custom']['lang']), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)), $paymentCurrency);
+                        $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message', $paymentResponseData['custom']['lang']), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)), $paymentCurrency, uniqid());
                     }
                     // Insert the refund details into Novalnet DB
                     $this->paymentService->insertPaymentResponse($paymentResponseData);
