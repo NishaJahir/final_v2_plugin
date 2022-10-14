@@ -475,7 +475,7 @@ class WebhookController extends Controller
     {
         // If refund is executing
         if(!empty($this->eventData['transaction']['refund']['amount'])) {
-			$webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_refund_execution', $this->orderLanguage), $this->parentTid, sprintf('%0.2f', ($this->eventData['transaction']['refund']['amount']/100)) , $this->eventData['transaction']['currency']);
+			$webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_refund_execution', $this->orderLanguage), $this->parentTid, sprintf('%0.2f', ($this->eventData['transaction']['refund']['amount']/100)) , $this->eventData['transaction']['currency'], uniqid());
             if(!empty($this->eventData['transaction']['refund']['tid'])) {
                 $webhookComments = sprintf($this->paymentHelper->getTranslatedText('webhook_new_tid_refund_execution', $this->orderLanguage), $this->parentTid, sprintf('%0.2f', ($this->eventData['transaction']['refund']['amount']/100)) , $this->eventData['transaction']['currency'], $this->eventTid);
             }
