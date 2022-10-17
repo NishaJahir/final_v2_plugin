@@ -374,15 +374,6 @@ class NovalnetAssistant extends WizardProvider
                                 'name' => 'NovalnetAssistant.novalnetCcDisplayInlineFormLabel'
                                ]
             ],
-            'novalnetCcLogos' =>
-            [
-                'type'          => 'checkboxGroup',
-                'defaultValue'  => ['Visa', 'MasterCard', 'AmericanExpress' , 'Mastero', 'Cartasi', 'UnionPay', 'Discover', 'DinersClub', 'Jcb', 'CarteBleue'],
-                'options'       => [
-                                    'name'              => 'NovalnetAssistant.novalnetCcLogosLabel',
-                                    'checkboxValues'    => $this->getAllowedCreditCardTypes()
-                                   ]
-            ],
             'novalnetCcStandardStyleLabel' =>
             [
                'type'       => 'text',
@@ -399,7 +390,8 @@ class NovalnetAssistant extends WizardProvider
             ],
             'novalnetCcStandardStyleCss' =>
             [
-               'type'       => 'text',
+               'type'         => 'text',
+	       'defaultValue' => 'body{color: #555;font-family: Verdana,Arial,sans-serif;font-size:12px;line-height: 1.5;}.label-group{width:152px !important;float:unset !important;}.expiry_date .cvc{width:100%;}',
                'options'    => [
                                 'name' => 'NovalnetAssistant.novalnetCcStandardStyleCssLabel'
                                ]
@@ -478,26 +470,6 @@ class NovalnetAssistant extends WizardProvider
             ]
         ];
         return $config;
-    }
-
-    /**
-    * Create the configuration for allowed card types
-    *
-    * @param array $config
-    *
-    * @return array
-    */
-    public function getAllowedCreditCardTypes()
-    {
-        $cardTypes = ['Visa', 'MasterCard', 'AmericanExpress' , 'Mastero', 'Cartesi', 'UnionPay', 'Discover', 'DinersClub', 'Jcb', 'CarteBleue'];
-        $allowedCreditCardTypes = [];
-        foreach($cardTypes as $cardTypeIndex => $cardType) {
-            $allowedCreditCardTypes[] = [
-                'caption' => 'NovalnetAssistant.novalnetCc'. $cardType .'Label',
-                'value' => $cardType
-            ];
-        }
-        return $allowedCreditCardTypes;
     }
 
     /**
