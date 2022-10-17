@@ -200,6 +200,13 @@ class PaymentService
         // Get the customer billing and shipping details
         $billingAddressId = $basket->customerInvoiceAddressId;
         $shippingAddressId = $basket->customerShippingAddressId;
+	// Get the billing and shipping address Id from session during the reinititiate payment process
+	if(empty($billingAddressId)) {
+		$billingAddressId = $this->sessionStorage->getPlugin()->getValue('nnBillingAddressId');	
+	}
+	if(empty($shippingAddressId)) {
+		$shippingAddressId = $this->sessionStorage->getPlugin()->getValue('nnShippingAddressId');
+	}
         $billingAddress = $this->paymentHelper->getCustomerAddress((int) $billingAddressId);
         $shippingAddress = $billingAddress;
         if(!empty($shippingAddressId)) {
@@ -448,7 +455,7 @@ class PaymentService
             if($isPaymentSuccess) {
                 $this->pushNotification($paymentResponseData['result']['status_text'], 'success', 100);
             } else {
-                    if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true) {
+                    if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true && empty($nnOrderCreator)) {
                         return $paymentResponseData;
                     }
                     $this->pushNotification($paymentResponseData['result']['status_text'], 'error', 100);
@@ -595,7 +602,7 @@ class PaymentService
 			'payment_name'     => $paymentResponseData['payment_method'],
 			'additional_info'  => $additionalInfo ?? 0,
 		];
-        if($transactionData['payment_name'] == 'NOVALNET_INVOICE' || $paymentResponseData['result']['status'] != 'SUCCESS') {
+        if(in_array($transactionData['payment_name'], ['NOVALNET_INVOICE', 'NOVALNET_PREPAYMENT', 'NOVALNET_MULTIBANCO']) ||  (in_array($transactionData['payment_name'], ['NOVALNET_PAYPAL', 'NOALNET_PRZELEWY24']) && in_array($paymentResponseData['transaction']['status'], ['PENDING', 'ON_HOLD'])) || $paymentResponseData['result']['status'] != 'SUCCESS') {
             $transactionData['callback_amount'] = 0;
         }
         $this->transactionService->saveTransaction($transactionData);
@@ -756,12 +763,21 @@ class PaymentService
     public function getCreditCardAuthenticationCallData(Basket $basket, $paymentKey, $orderAmount = 0)
     {
         // Get the customer billing and shipping details
-		$billingAddress = $this->paymentHelper->getCustomerAddress((int) $basket->customerInvoiceAddressId);
-        if(!empty($basket->customerShippingAddressId)) {
-            $shippingAddress = $this->paymentHelper->getCustomerAddress((int) $basket->customerShippingAddressId);
-        } else {
-			$shippingAddress = $billingAddress;
-		}
+        $billingAddressId = $basket->customerInvoiceAddressId;
+        $shippingAddressId = $basket->customerShippingAddressId;
+	
+	// Get the billing and shipping address Id from session during the reinititiate payment process
+	if(empty($billingAddressId)) {
+		$billingAddressId = $this->sessionStorage->getPlugin()->getValue('nnBillingAddressId');	
+	}
+	if(empty($shippingAddressId)) {
+		$shippingAddressId = $this->sessionStorage->getPlugin()->getValue('nnShippingAddressId');
+	}
+        $billingAddress = $this->paymentHelper->getCustomerAddress((int) $billingAddressId);
+        $shippingAddress = $billingAddress;
+        if(!empty($shippingAddressId)) {
+            $shippingAddress = $this->paymentHelper->getCustomerAddress((int) $shippingAddressId);
+        }
         // Get the customer name if the salutation as Person
         $customerName = $this->getCustomerName($billingAddress);
         /** @var \Plenty\Modules\Frontend\Services\VatService $vatService */
