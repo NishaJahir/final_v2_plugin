@@ -196,7 +196,8 @@ class NovalnetAssistant extends WizardProvider
                         ],
                         'novalnetOrderCreation' =>
                         [
-                            'type'      => 'checkbox',
+                            'type'         => 'checkbox',
+			    'defaultValue' => true,
                             'options'   => [
                                             'name'  => 'NovalnetAssistant.novalnetOrderCreationLabel'
                                            ]
