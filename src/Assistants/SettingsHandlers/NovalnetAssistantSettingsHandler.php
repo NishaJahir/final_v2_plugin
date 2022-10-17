@@ -56,7 +56,6 @@ class NovalnetAssistantSettingsHandler implements WizardSettingsHandler
                 case 'novalnet_cc':
                     $novalnetSettings[$paymentMethodKey]['enforce']              = $data[$paymentKey . 'Enforce'] ?? '';
                     $novalnetSettings[$paymentMethodKey]['inline_form']          = $data[$paymentKey . 'InlineForm'] ?? '';
-                    $novalnetSettings[$paymentMethodKey]['logos']                = $data[$paymentKey . 'Logos'] ?? '';
                     $novalnetSettings[$paymentMethodKey]['payment_action']       = $data[$paymentKey . 'PaymentAction'] ?? '';
                     $novalnetSettings[$paymentMethodKey]['onhold_amount']        = $data[$paymentKey . 'OnHold'] ?? '';
                     $novalnetSettings[$paymentMethodKey]['standard_style_label'] = $data[$paymentKey . 'StandardStyleLabel'] ?? '';
