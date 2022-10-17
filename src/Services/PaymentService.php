@@ -685,13 +685,15 @@ class PaymentService
     public function isGuaranteePaymentToBeDisplayed(Basket $basket, $paymentKey)
     {
         try {
-            if(!is_null($basket) && $basket instanceof Basket && !empty($basket->customerInvoiceAddressId)) {
+	    $billingAddressId = !empty($basket->customerInvoiceAddressId) ? $basket->customerInvoiceAddressId : $this->sessionStorage->getPlugin()->getValue('nnBillingAddressId');
+            $shippingAddressId = !empty($basket->customerShippingAddressId) ? $basket->customerShippingAddressId : $this->sessionStorage->getPlugin()->getValue('nnShippingAddressId');
+            if(!is_null($basket) && $basket instanceof Basket && !empty($billingAddressId)) {
                 // Check if the guaranteed payment method is enabled
                 if($this->settingsService->getPaymentSettingsValue('payment_active', $paymentKey) == true) {
                     // Get the customer billing and shipping details
-					$billingAddress = $this->paymentHelper->getCustomerAddress((int) $basket->customerInvoiceAddressId);
+					$billingAddress = $this->paymentHelper->getCustomerAddress((int) $billingAddressId);
                     if(!empty($basket->customerShippingAddressId)) {
-                        $shippingAddress = $this->paymentHelper->getCustomerAddress((int) $basket->customerShippingAddressId);
+                        $shippingAddress = $this->paymentHelper->getCustomerAddress((int) $shippingAddressId);
                     } else {
 						$shippingAddress = $billingAddress;
 					}
@@ -701,7 +703,7 @@ class PaymentService
                     $configuredMinimumGuaranteedAmount = $this->settingsService->getPaymentSettingsValue('minimum_order_amount', $paymentKey);
                     $minimumGuaranteedAmount = !empty($configuredMinimumGuaranteedAmount) ? $configuredMinimumGuaranteedAmount : 999;
                     // Get the basket total amount
-                    $basketAmount = !empty($basket->basketAmount) ? $this->paymentHelper->convertAmountToSmallerUnit($basket->basketAmount) : 0;
+                    $basketAmount = !empty($basket->basketAmount) ? $this->paymentHelper->convertAmountToSmallerUnit($basket->basketAmount) : $this->sessionStorage->getPlugin()->getValue('nnOrderAmount');
                     // First, we check the billing and shipping addresses are matched
                     // Second, we check the customer from the guaranteed payments supported countries
                     // Third, we check if the supported currency is selected
