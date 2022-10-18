@@ -13,6 +13,7 @@ use Plenty\Plugin\Controller;
 use Plenty\Plugin\Http\Request;
 use Plenty\Plugin\Http\Response;
 use Novalnet\Services\PaymentService;
+use Novalnet\Helper\PaymentHelper;
 use Novalnet\Services\SettingsService;
 use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFactoryContract;
 use Plenty\Modules\Basket\Contracts\BasketRepositoryContract;
@@ -38,6 +39,11 @@ class PaymentController extends Controller
      * @var PaymentService
      */
     private $paymentService;
+    
+    /**
+     * @var PaymentHelper
+     */
+    private $paymentHelper;
 
     /**
      * @var SettingsService
@@ -60,6 +66,7 @@ class PaymentController extends Controller
      * @param Request $request
      * @param Response $response
      * @param PaymentService $paymentService
+     * @param PaymentHelper $paymentHelper
      * @param SettingsService $settingsService
      * @param FrontendSessionStorageFactoryContract $sessionStorage
      * @param BasketRepositoryContract $basketRepository
@@ -67,6 +74,7 @@ class PaymentController extends Controller
     public function __construct(Request $request,
                                 Response $response,
                                 PaymentService $paymentService,
+                                PaymentHelper $paymentHelper,
                                 SettingsService $settingsService,
                                 FrontendSessionStorageFactoryContract $sessionStorage,
                                 BasketRepositoryContract $basketRepository
@@ -75,6 +83,7 @@ class PaymentController extends Controller
         $this->request          = $request;
         $this->response         = $response;
         $this->paymentService   = $paymentService;
+        $this->paymentHelper    = $paymentHelper;
         $this->settingsService  = $settingsService;
         $this->sessionStorage   = $sessionStorage;
         $this->basketRepository = $basketRepository;
@@ -165,6 +174,10 @@ class PaymentController extends Controller
         }
         // Call the order creation function for the redirection
         if(!empty($paymentRequestPostData['nn_cc3d_redirect']) || !empty($paymentRequestPostData['nn_google_pay_do_redirect'])) {
+             if(!empty($paymentRequestPostData['nn_reinitializePayment'])) {
+                $this->paymentService->pushNotification($this->paymentHelper->getTranslatedText('chose_another_payment'), 'error', 100);
+                return $this->response->redirectTo($this->sessionStorage->getLocaleSettings()->language . '/confirmation');
+             }
              $paymentRequestData['paymentRequestData']['transaction']['return_url'] = $this->paymentService->getReturnPageUrl();
              $this->sessionStorage->getPlugin()->setValue('nnPaymentData', $paymentRequestData);
              return $this->response->redirectTo($this->sessionStorage->getLocaleSettings()->language . '/place-order');
