@@ -424,6 +424,16 @@ class PaymentService
     {
         return $this->webstoreHelper->getCurrentWebstoreConfiguration()->domainSsl . '/' . $this->sessionStorage->getLocaleSettings()->language . '/payment/novalnet/paymentResponse/';
     }
+	
+    /**
+    * Get the redirect payment process controller URL to be handled
+    *
+    * @return string
+    */
+    public function getRedirectPaymentUrl()
+    { 
+        return $this->webstoreHelper->getCurrentWebstoreConfiguration()->domainSsl . '/' . $this->sessionStorage->getLocaleSettings()->language . '/payment/novalnet/redirectPayment/';
+    }
 
     /**
      * Send the payment call request to Novalnet server
