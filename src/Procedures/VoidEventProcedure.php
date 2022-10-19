@@ -45,8 +45,15 @@ class VoidEventProcedure
     {
         /* @var $order Order */
         $order = $eventTriggered->getOrder();
+        // Load the order language
+        foreach($order->properties as $orderProperty) {
+            if($orderProperty->typeId == '6' ) {
+                $orderLanguage = $orderProperty->value;
+            }
+        }
         // Get necessary information for the capture process
         $transactionDetails = $this->paymentService->getDetailsFromPaymentProperty($order->id);
+        $transactionDetails['lang'] = $orderLanguage;
         // Call the Void process for the On-Hold payments
         if($transactionDetails['tx_status'] == 'ON_HOLD') {
             $this->paymentService->doCaptureVoid($transactionDetails, NovalnetConstants::PAYMENT_VOID_URL);
