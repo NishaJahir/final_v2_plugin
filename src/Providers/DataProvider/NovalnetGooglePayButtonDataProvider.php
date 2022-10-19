@@ -15,6 +15,8 @@ use Plenty\Plugin\Templates\Twig;
 use Plenty\Modules\Basket\Models\Basket;
 use Plenty\Modules\Basket\Contracts\BasketRepositoryContract;
 use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFactoryContract;
+use Plenty\Modules\Order\Shipping\Countries\Contracts\CountryRepositoryContract;
+use Plenty\Modules\Helper\Services\WebstoreHelper;
 
 /**
  * Class NovalnetGooglePayButtonDataProvider
@@ -28,12 +30,16 @@ class NovalnetGooglePayButtonDataProvider
      *
      * @param Twig $twig
      * @param BasketRepositoryContract $basketRepository
+     * @param CountryRepositoryContract $countryRepository
+     * @param WebstoreHelper $webstoreHelper
      * @param Arguments $arg
      *
      * @return string
      */
     public function call(Twig $twig,
                          BasketRepositoryContract $basketRepository,
+                         CountryRepositoryContract $countryRepository,
+                         WebstoreHelper $webstoreHelper,
                          $arg)
     {
         $basket             = $basketRepository->load();
@@ -51,11 +57,15 @@ class NovalnetGooglePayButtonDataProvider
         $paymentMethodDetails = $paymentHelper->getPaymentMethodByKey('NOVALNET_GOOGLEPAY');
         // Get the order language
         $orderLang = strtoupper($sessionStorage->getLocaleSettings()->language);
+        // Get the countryCode
+        $billingAddress = $paymentHelper->getCustomerAddress((int) $basket->customerInvoiceAddressId);
+        // Get the seller name from the shop configuaration
+        $sellerName = $settingsService->getPaymentSettingsValue('business_name', 'novalnet_googlepay');
         // Required details for the Google Pay button
         $googlePayData = [
                             'clientKey'     => trim($settingsService->getPaymentSettingsValue('novalnet_client_key')),
                             'merchantId'    => $settingsService->getPaymentSettingsValue('payment_active', 'novalnet_googlepay'),
-                            'sellerName'    => $settingsService->getPaymentSettingsValue('business_name', 'novalnet_googlepay'),
+                            'sellerName'    => !empty($sellerName) ? $sellerName : $webstoreHelper->getCurrentWebstoreConfiguration()->name,
                             'enforce'       => $settingsService->getPaymentSettingsValue('enforce', 'novalnet_googlepay'),
                             'buttonType'    => $settingsService->getPaymentSettingsValue('button_type', 'novalnet_googlepay'),
                             'buttonTheme'   => $settingsService->getPaymentSettingsValue('button_theme', 'novalnet_googlepay'),
@@ -67,8 +77,8 @@ class NovalnetGooglePayButtonDataProvider
                                     [
                                         'mopId'                 => $paymentMethodDetails[0],
                                         'googlePayData'         => $googlePayData,
-                                        'countryCode'           => 'DE',
-                                        'orderTotalAmount'      => $orderAmount,
+                                        'countryCode'           => $countryRepository->findIsoCode($billingAddress->countryId, 'iso_code_2'),
+                                        'orderAmount'           => $orderAmount,
                                         'orderLang'             => $orderLang,
                                         'orderCurrency'         => $basket->currency,
                                         'nnPaymentProcessUrl'   => $paymentService->getProcessPaymentUrl()
