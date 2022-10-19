@@ -1153,4 +1153,27 @@ class PaymentService
 		}
 		return $transactionComments;
     }
+	
+    /**
+     * Update the payment processing API version
+     *
+     * @param array $paymentRequestData
+     *
+     * @return none
+     */
+    public function updateApiVersion($paymentRequestData)
+    {
+		
+	$paymentRequestData = [];
+	// Build the merchant Data
+	$paymentRequestData['merchant'] = ['signature' => $paymentRequestData['novalnet_public_key']];
+	// Build the Custom Data
+	$paymentRequestData['custom'] = ['lang' => 'DE'];
+	$paymentResponseData = $this->paymentHelper->executeCurl($paymentRequestData, NovalnetConstants::MERCHANT_DETAILS, $paymentRequestData['novalnet_private_key']);
+	if($paymentResponseData['result']['status'] == 'SUCCESS') {
+		$this->getLogger(__METHOD__)->error('Novalnet::updateApiVersion', 'Novalnet API Vrsion updated successfully');
+	} else {
+		$this->getLogger(__METHOD__)->error('Novalnet::updateApiVersion failed', $paymentResponseData);
+	}
+   }
 }
