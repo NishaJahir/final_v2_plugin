@@ -75,7 +75,7 @@ class NovalnetGooglePayButtonDataProvider
         // Render the Google Pay button
        return $twig->render('Novalnet::PaymentForm.NovalnetGooglePayButton',
                                     [
-                                        'mopId'                 => $paymentMethodDetails[0],
+                                        'paymentMethodId'       => $paymentMethodDetails[0],
                                         'googlePayData'         => $googlePayData,
                                         'countryCode'           => $countryRepository->findIsoCode($billingAddress->countryId, 'iso_code_2'),
                                         'orderAmount'           => $orderAmount,
