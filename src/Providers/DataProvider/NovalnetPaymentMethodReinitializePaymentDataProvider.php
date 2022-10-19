@@ -31,7 +31,7 @@ class NovalnetPaymentMethodReinitializePaymentDataProvider
      *
      * @return string
      */
-    public function call(Twig $twig, $arg)
+    public function call(Twig $twig, WebstoreHelper $webstoreHelper, $arg)
     {
         $order = $arg[0];
         $paymentService     = pluginApp(PaymentService::class);
