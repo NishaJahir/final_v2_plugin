@@ -142,7 +142,7 @@ class PaymentController extends Controller
             $this->getLogger(__METHOD__)->error('req', $paymentRequestData);
             // Set the payment response in the session for the further processings
             $this->sessionStorage->getPlugin()->setValue('nnPaymentData', array_merge($paymentRequestData, $paymentResponseData));
-            if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true) {
+            if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true && empty($paymentRequestData['transaction']['order_no'])) {
                 // Call the shop executePayment function
                 return $this->response->redirectTo($this->sessionStorage->getLocaleSettings()->language . '/place-order');
             }
