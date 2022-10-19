@@ -453,9 +453,10 @@ class PaymentService
             $paymentRequestData['paymentRequestData']['transaction']['order_no'] = $this->sessionStorage->getPlugin()->getValue('nnOrderNo');
         }
         $privateKey = $this->settingsService->getPaymentSettingsValue('novalnet_private_key');
+	 $this->getLogger(__METHOD__)->error('R', $paymentRequestData);
         $paymentResponseData = $this->paymentHelper->executeCurl($paymentRequestData['paymentRequestData'], $paymentRequestData['paymentUrl'], $privateKey);
         $isPaymentSuccess = isset($paymentResponseData['result']['status']) && $paymentResponseData['result']['status'] == 'SUCCESS';
-        
+        $this->getLogger(__METHOD__)->error('S', $paymentResponseData);
         // Do redirect if the redirect URL is present
         if($isPaymentSuccess && ($this->isRedirectPayment($paymentKey) || !empty($nnDoRedirect) || !empty($nnGooglePayDoRedirect))) {
             // Set the payment response in the session for the further processings
@@ -576,6 +577,7 @@ class PaymentService
 	$this->getLogger(__METHOD__)->error('before data', $nnPaymentData);
         // Update the Order No to the order if the payment before order completion set as 'No' for direct payments
          if(empty($nnOrderCreator) && $this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true) {
+		 $this->getLogger(__METHOD__)->error('P', $nnPaymentData);
             $paymentResponseData = $this->sendPostbackCall($nnPaymentData);
             $nnPaymentData = array_merge($nnPaymentData, $paymentResponseData);
             $this->sessionStorage->getPlugin()->setValue('nnInvoiceRef', $nnPaymentData['transaction']['invoice_ref']);
