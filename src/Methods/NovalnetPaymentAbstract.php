@@ -233,7 +233,7 @@ abstract class NovalnetPaymentAbstract extends PaymentMethodBaseService
      */
     public function getBackendName(string $lang = 'de'): string
     {
-        return 'Novalnet:' . $this->getName($lang);
+        return 'Novalnet ' . $this->getName($lang);
     }
 
     /**
