@@ -13,6 +13,8 @@ use Novalnet\Services\PaymentService;
 use Plenty\Modules\Basket\Contracts\BasketRepositoryContract;
 use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFactoryContract;
 use Novalnet\Helper\PaymentHelper;
+use Novalnet\Services\SettingsService;
+use Plenty\Modules\Helper\Services\WebstoreHelper;
 
 /**
  * Class NovalnetPaymentMethodReinitializePaymentDataProvider
@@ -36,6 +38,7 @@ class NovalnetPaymentMethodReinitializePaymentDataProvider
         $basketRepository   = pluginApp(BasketRepositoryContract::class);
         $sessionStorage     = pluginApp(FrontendSessionStorageFactoryContract::class);
         $paymentHelper      = pluginApp(PaymentHelper::class);
+	$settingsService    = pluginApp(SettingsService::class);
 
         // Get the Novalnet payment method Id
         foreach($order['properties'] as $orderProperty) {
@@ -83,10 +86,27 @@ class NovalnetPaymentMethodReinitializePaymentDataProvider
                  $ccFormDetails = $paymentService->getCreditCardAuthenticationCallData($basketRepository->load(), strtolower($paymentKey), $invoiceAmount);
                  $ccCustomFields = $paymentService->getCcFormFields();
             }
+	    
+	    if($paymentKey == 'NOVALNET_GOOGLEPAY') {
+		// Get the seller name from the shop configuaration
+		$sellerName = $settingsService->getPaymentSettingsValue('business_name', 'novalnet_googlepay');
+		$googlePayData = [
+		    'clientKey'           => trim($settingsService->getPaymentSettingsValue('novalnet_client_key')),
+		    'merchantId'          => $settingsService->getPaymentSettingsValue('payment_active', 'novalnet_googlepay'),
+		    'sellerName'          => !empty($sellerName) ? $sellerName : $webstoreHelper->getCurrentWebstoreConfiguration()->name,
+		    'enforce'             => $settingsService->getPaymentSettingsValue('enforce', 'novalnet_googlepay'),
+		    'buttonType'          => $settingsService->getPaymentSettingsValue('button_type', 'novalnet_googlepay'),
+		    'buttonTheme'         => $settingsService->getPaymentSettingsValue('button_theme', 'novalnet_googlepay'),
+		    'buttonHeight'        => $settingsService->getPaymentSettingsValue('button_height', 'novalnet_googlepay'),
+		    'testMode'            => ($settingsService->getPaymentSettingsValue('test_mode', 'novalnet_googlepay') == true) ? 'SANDBOX' : 'PRODUCTION'
+		 ];	
+			
+	     }
+		
 
             // Check if the birthday field needs to show for guaranteed payments
             $showBirthday = ((!isset($paymentRequestData['paymentRequestData']['customer']['billing']['company']) && !isset($paymentRequestData['paymentRequestData']['customer']['birth_date'])) ||  (isset($paymentRequestData['paymentRequestData']['customer']['birth_date']) && time() < strtotime('+18 years', strtotime($paymentRequestData['paymentRequestData']['customer']['birth_date'])))) ? true : false;
-        }
+          }
 
         // If the Novalnet payments are rejected do the reinitialize payment
         if(strpos($paymentKey, 'NOVALNET') !== false && ((!empty($transactionDetails['tx_status']) && !in_array($transactionDetails['tx_status'], ['PENDING', 'ON_HOLD', 'CONFIRMED', 'DEACTIVATED'])) || empty($transactionDetails['tx_status']))) {
@@ -101,7 +121,13 @@ class NovalnetPaymentMethodReinitializePaymentDataProvider
                                             'transactionData' => !empty($ccFormDetails) ? $ccFormDetails : '',
                                             'customData' => !empty($ccCustomFields) ? $ccCustomFields : '',
                                             'showBirthday' => $showBirthday,
-                                            'orderAmount' => $invoiceAmount
+                                            'orderAmount' => $invoiceAmount,
+					    'redirectPayment' => $paymentService->isRedirectPayment($paymentKey),
+					    'redirectUrl' => $paymentService->getRedirectPaymentUrl(),
+					    'orderLang'   => $paymentRequestData['paymentRequestData']['custom']['lang'],
+					    'countryCode' => $paymentRequestData['paymentRequestData']['customer']['billing']['country_code'],
+					    'orderCurrency'  => $basketRepository->load()->currency,
+					    'googlePayData' => !empty($googlePayData) ? $googlePayData : ''
 										]);
         } else {
             return '';
