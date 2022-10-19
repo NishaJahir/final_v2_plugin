@@ -17,6 +17,7 @@ use Novalnet\Helper\PaymentHelper;
 use Novalnet\Services\SettingsService;
 use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFactoryContract;
 use Plenty\Modules\Basket\Contracts\BasketRepositoryContract;
+use Plenty\Plugin\Templates\Twig;
 
 /**
  * Class PaymentController
@@ -59,6 +60,11 @@ class PaymentController extends Controller
      * @var BasketRepositoryContract
      */
     private $basketRepository;
+    
+    /**
+     * @var Twig
+     */
+    private $twig;
 
     /**
      * Constructor.
@@ -70,6 +76,7 @@ class PaymentController extends Controller
      * @param SettingsService $settingsService
      * @param FrontendSessionStorageFactoryContract $sessionStorage
      * @param BasketRepositoryContract $basketRepository
+     * @param Twig $twig
      */
     public function __construct(Request $request,
                                 Response $response,
@@ -77,7 +84,8 @@ class PaymentController extends Controller
                                 PaymentHelper $paymentHelper,
                                 SettingsService $settingsService,
                                 FrontendSessionStorageFactoryContract $sessionStorage,
-                                BasketRepositoryContract $basketRepository
+                                BasketRepositoryContract $basketRepository,
+                                Twig $twig
                                )
     {
         $this->request          = $request;
@@ -87,6 +95,7 @@ class PaymentController extends Controller
         $this->settingsService  = $settingsService;
         $this->sessionStorage   = $sessionStorage;
         $this->basketRepository = $basketRepository;
+        $this->twig             = $twig;
     }
 
     /**
