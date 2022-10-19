@@ -18,14 +18,15 @@ use Novalnet\Services\SettingsService;
 use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFactoryContract;
 use Plenty\Modules\Basket\Contracts\BasketRepositoryContract;
 use Plenty\Plugin\Templates\Twig;
-
+use Plenty\Plugin\Log\Loggable;
 /**
  * Class PaymentController
  *
  * @package Novalnet\Controllers
  */
 class PaymentController extends Controller
-{
+{ 
+    use Loggable;
     /**
      * @var Request
      */
@@ -107,7 +108,7 @@ class PaymentController extends Controller
 
         // Get the initial payment call response
         $paymentResponseData = $this->request->all();
-        $this->getLogger(__METHOD__)->error('post', $paymentResponseData);
+        
         // Checksum validation for redirects
         if(!empty($paymentResponseData['tid'])) {
             if($paymentResponseData['status'] == 'SUCCESS') {
@@ -138,9 +139,10 @@ class PaymentController extends Controller
                 }
             }
             $paymentRequestData = $this->sessionStorage->getPlugin()->getValue('nnPaymentData');
+            $this->getLogger(__METHOD__)->error('req', $paymentRequestData);
             // Set the payment response in the session for the further processings
             $this->sessionStorage->getPlugin()->setValue('nnPaymentData', array_merge($paymentRequestData, $paymentResponseData));
-            if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true && empty($paymentResponseData['nn_reinitializePayment'])) {
+            if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true) {
                 // Call the shop executePayment function
                 return $this->response->redirectTo($this->sessionStorage->getLocaleSettings()->language . '/place-order');
             }
