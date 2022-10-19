@@ -206,13 +206,25 @@ class PaymentController extends Controller
      */
     public function directPaymentProcess()
     {
+        $this->paymentService->performServerCall();
+    }
+    
+    /**
+     * Process the redirect payment methods when the change payment method option used
+     *
+     */
+    public function redirectPayment()
+    {        
         $paymentResponseData = $this->paymentService->performServerCall();
         $paymentKey = $this->sessionStorage->getPlugin()->getValue('paymentkey');
         if($this->paymentService->isRedirectPayment($paymentKey)) {
             if(!empty($paymentResponseData) && !empty($paymentResponseData['result']['redirect_url']) && !empty($paymentResponseData['transaction']['txn_secret'])) {
                 // Transaction secret used for the later checksum verification
                 $this->sessionStorage->getPlugin()->setValue('nnTxnSecret', $paymentResponseData['transaction']['txn_secret']);
-               $this->response->redirectToIntended($paymentResponseData['result']['redirect_url'], 302, ['Access-Control-Allow-Headers' => '*']);
+                return $this->twig->render('Novalnet::NovalnetPaymentRedirectForm', 
+                        [
+                            'nnPaymentUrl' => $paymentResponseData['result']['redirect_url']
+                        ]);
             } else {
                 // Redirect to confirmation page
                 $this->paymentService->pushNotification($paymentResponseData['result']['status_text'], 'error', 100);
