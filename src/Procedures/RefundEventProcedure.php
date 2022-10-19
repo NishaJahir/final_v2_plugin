@@ -101,6 +101,12 @@ class RefundEventProcedure
             } else {
                  $refundAmount = (float) $order->amounts[0]->invoiceTotal; // Get the refunding amount
             }
+	     // Load the order language
+		foreach($order->properties as $orderProperty) {
+		    if($orderProperty->typeId == '6' ) {
+			$orderLanguage = $orderProperty->value;
+		    }
+		}
             // Get necessary information for the refund process
             $transactionDetails = $this->paymentService->getDetailsFromPaymentProperty($parentOrderId);
             if(in_array($transactionDetails['tx_status'], ['PENDING', 'CONFIRMED'])) {
@@ -109,7 +115,7 @@ class RefundEventProcedure
                 $paymentRequestData = [];
                 $paymentRequestData['transaction']['tid']    = $transactionDetails['tid'];
                 $paymentRequestData['transaction']['amount'] = (float) $refundAmount * 100;
-                $paymentRequestData['custom']['lang'] = 'DE';
+                $paymentRequestData['custom']['lang'] = strtoupper($orderLanguage);
                 // Send the payment capture/void call to Novalnet server
                 $paymentResponseData = $this->paymentHelper->executeCurl($paymentRequestData, NovalnetConstants::PAYMENT_REFUND_URL, $privateKey);
                 $paymentResponseData = array_merge($paymentRequestData, $paymentResponseData);
@@ -118,9 +124,9 @@ class RefundEventProcedure
                 if(in_array($paymentResponseData['transaction']['status'], ['PENDING', 'CONFIRMED', 'DEACTIVATED'])) {
                     // Booking text
                     if(!empty($paymentResponseData['transaction']['refund']['tid'])) {
-                        $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message_new_tid', $paymentResponseData['custom']['lang']), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)) , $paymentCurrency, $paymentResponseData['transaction']['refund']['tid']);
+                        $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message_new_tid', $orderLanguage), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)) , $paymentCurrency, $paymentResponseData['transaction']['refund']['tid']);
                     } else {
-                        $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message', $paymentResponseData['custom']['lang']), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)), $paymentCurrency, uniqid());
+                        $paymentResponseData['bookingText'] = sprintf($this->paymentHelper->getTranslatedText('refund_message', $orderLanguage), $paymentResponseData['transaction']['tid'], sprintf('%0.2f', ($paymentResponseData['transaction']['refund']['amount'] / 100)), $paymentCurrency, uniqid());
                     }
                     // Insert the refund details into Novalnet DB
                     $this->paymentService->insertPaymentResponse($paymentResponseData);
