@@ -139,7 +139,7 @@ class PaymentController extends Controller
             $paymentRequestData = $this->sessionStorage->getPlugin()->getValue('nnPaymentData');
             // Set the payment response in the session for the further processings
             $this->sessionStorage->getPlugin()->setValue('nnPaymentData', array_merge($paymentRequestData, $paymentResponseData));
-            if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true) {
+            if($this->settingsService->getPaymentSettingsValue('novalnet_order_creation') != true && empty($paymentRequestPostData['nn_reinitializePayment'])) {
                 // Call the shop executePayment function
                 return $this->response->redirectTo($this->sessionStorage->getLocaleSettings()->language . '/place-order');
             }
@@ -239,7 +239,9 @@ class PaymentController extends Controller
     {        
         $paymentResponseData = $this->paymentService->performServerCall();
         $paymentKey = $this->sessionStorage->getPlugin()->getValue('paymentkey');
-        if($this->paymentService->isRedirectPayment($paymentKey)) {
+        $nnDoRedirect = $this->sessionStorage->getPlugin()->getValue('nnDoRedirect');
+        $nnGooglePayDoRedirect = $this->sessionStorage->getPlugin()->getValue('nnGooglePayDoRedirect');
+        if($paymentService->isRedirectPayment($paymentKey) || !empty($nnDoRedirect) || !empty($nnGooglePayDoRedirect)) {
             if(!empty($paymentResponseData) && !empty($paymentResponseData['result']['redirect_url']) && !empty($paymentResponseData['transaction']['txn_secret'])) {
                 // Transaction secret used for the later checksum verification
                 $this->sessionStorage->getPlugin()->setValue('nnTxnSecret', $paymentResponseData['transaction']['txn_secret']);
